@@ -19,7 +19,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Enemy.cpp" />
+    <ClCompile Include="src\Hero.cpp" />
     <ClCompile Include="src\source.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\Enemy.h" />
+    <ClInclude Include="src\Hero.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
