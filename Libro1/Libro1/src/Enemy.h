@@ -8,15 +8,14 @@ public:
 	~Enemy();
 
 
-	void init(std::string textureName, sf::Vector2f position, float _speed);
-	void update(float dt);
+	void init(std::string textureName, sf::Vector2f position);
+	void update(float heroPosx, float heroPosy, float enemySpeed, float dt);
 	sf::Sprite getSprite();
 
 private:
 	sf::Texture m_texture;
 	sf::Sprite m_sprite;
 	sf::Vector2f m_position;
-	float m_speed;
 
 };
 

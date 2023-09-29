@@ -4,9 +4,8 @@ Enemy::Enemy() {}
 
 Enemy::~Enemy() {};
 
-void Enemy::init(std::string textureName, sf::Vector2f position, float _speed) {
+void Enemy::init(std::string textureName, sf::Vector2f position) {
 
-	m_speed = _speed;
 	m_position = position;
 
 	m_texture.loadFromFile(textureName.c_str());
@@ -17,9 +16,21 @@ void Enemy::init(std::string textureName, sf::Vector2f position, float _speed) {
 
 }
 
-void Enemy::update(float dt) {
+void Enemy::update(float heroPosx, float heroPosy, float enemySpeed, float dt) {
 
-	m_sprite.move(m_speed * dt, 0);
+	
+	if (heroPosx > m_sprite.getPosition().x) {
+		m_sprite.move(enemySpeed * dt, 0);
+	}
+	else {
+		m_sprite.move(-enemySpeed * dt, 0);
+	}
+	if (heroPosy > m_sprite.getPosition().y) {
+		m_sprite.move(0, enemySpeed / 1.34f * dt);
+	}
+	else {
+		m_sprite.move(0, -enemySpeed / 1.34f * dt);
+	}
 
 }
 
