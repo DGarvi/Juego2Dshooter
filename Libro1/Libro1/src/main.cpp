@@ -6,7 +6,7 @@
 #include "Enemy.h"
 #include "Hero.h"
 #include "Missile.h"
-
+#include "EnemyMissile.h"
 
 //sf::Music bgMusic;
 sf::SoundBuffer fireBuffer;
@@ -30,6 +30,7 @@ Hero hero;
 
 std::vector<Enemy*> enemies;
 std::vector<Missile*> missiles;
+std::vector<EnemyMissile*> enemyMissiles;
 
 float currentTime;
 float prevTime = 0.0f;
@@ -47,9 +48,12 @@ bool playerMovingLeft = false;
 bool playerMovingRight = false;
 
 int enemySpeed = 100;
-int maxSpeed = 450;
+int maxSpeed = 300;
 float spawnRate = 1.50f;
-float minSpawnRate = 0.80f;
+float minSpawnRate = 0.50f;
+float enemyFireRate = 0.30f;
+float enemyBulletSpeed = 500.0f;
+bool enemyShootAllowed = false;
 
 int score = 0;
 bool gameover = true;
@@ -71,6 +75,7 @@ bool playerMoving = false;
 void shoot(sf::Vector2f playerPos, sf::Vector2i mousePos);
 bool checkCollisionBullet(sf::Sprite sprite1, sf::Sprite sprite2);
 bool checkCollisionHero(sf::Sprite sprite1, sf::Sprite sprite2);
+void enemyShoot(sf::Vector2f playerPos, sf::Vector2f enemyPos);
 
 void reset();
 
@@ -190,6 +195,10 @@ void draw() {
 	}
 
 	for (Missile* missile : missiles) {
+		window.draw(missile->getSprite());
+	}
+
+	for (EnemyMissile* missile : enemyMissiles) {
 		window.draw(missile->getSprite());
 	}
 
@@ -319,6 +328,7 @@ void update(float dt) {
 		prevTime = currentTime;
 		enemySpeed = enemySpeed + 20;
 		spawnRate = spawnRate - 0.10f;
+		enemyShootAllowed = true;
 
 		if (enemySpeed > maxSpeed) {
 			enemySpeed = maxSpeed;
@@ -329,14 +339,52 @@ void update(float dt) {
 		}
 
 	}
+	
+
+		
+	
 
 	for (int i = 0; i < enemies.size(); i++) {
 
+		
+
 		Enemy* enemy = enemies[i];
 
+		sf::Vector2f heroPos = sf::Vector2f(hero.getSprite().getPosition().x, hero.getSprite().getPosition().y);
+
+		sf::Vector2f enemyPos = sf::Vector2f(enemies[i]->getSprite().getPosition().x, enemies[i]->getSprite().getPosition().y);
+		
 		enemy->update(hero.getSprite().getPosition().x, hero.getSprite().getPosition().y, enemySpeed, dt);
+		
 
+		
+			if (currentTime >= prevTime + enemyFireRate && enemyShootAllowed) {
 
+				enemyShoot(heroPos, enemyPos);
+				enemyShootAllowed = false;
+			}
+		
+		
+			if (currentTime >= prevTime + 2 * enemyFireRate && enemyShootAllowed) {
+
+				enemyShoot(heroPos, enemyPos);
+				enemyShootAllowed = false;
+			}
+		
+	}
+
+	for (int i = 0; i < enemyMissiles.size(); i++) {
+
+		EnemyMissile* missile = enemyMissiles[i];
+
+		missile->update(dt);
+
+		if (missile->getSprite().getPosition().x > viewSize.x) {
+
+			enemyMissiles.erase(enemyMissiles.begin() + i);
+			delete(missile);
+
+		}
 	}
 
 	for (int i = 0; i < missiles.size(); i++) {
@@ -364,6 +412,17 @@ void update(float dt) {
 
 		}
 
+	}
+
+	for (int i = 0; i < enemyMissiles.size(); i++) {
+
+		EnemyMissile* missile = enemyMissiles[i];
+		
+		if (checkCollisionHero(hero.getSprite(), missile->getSprite())) {
+
+			gameover = true;
+
+		}
 	}
 
 
@@ -439,6 +498,45 @@ void shoot(sf::Vector2f playerPos, sf::Vector2i mousePos) {
 		 missileSpeedx, missileSpeedy);
 	
 	missiles.push_back(missile);
+
+	fireSound.play();
+
+}
+
+void enemyShoot(sf::Vector2f playerPos, sf::Vector2f enemyPos) {
+
+	float missileSpeedx;
+	float missileSpeedy;
+
+	float mag = sqrt(((playerPos.x) * (playerPos.x)) + ((playerPos.y) * (playerPos.y)));
+
+
+	if (playerPos.x > enemyPos.x) {
+		missileSpeedx = enemyBulletSpeed * -(((enemyPos.x - playerPos.x)) / mag);
+
+	}
+	else {
+		missileSpeedx = enemyBulletSpeed * -(((enemyPos.x - playerPos.x)) / mag);
+
+	}
+
+
+	if (playerPos.y > enemyPos.y) {
+		missileSpeedy = enemyBulletSpeed * -(((enemyPos.y - playerPos.y)) / mag);
+
+	}
+	else {
+		missileSpeedy = enemyBulletSpeed * -(((enemyPos.y - playerPos.y)) / mag);
+
+	}
+
+
+	EnemyMissile* missile = new EnemyMissile();
+
+	missile->init("Assets/graphics/rocket.png", sf::Vector2f(enemyPos.x, enemyPos.y),
+		missileSpeedx, missileSpeedy);
+
+	enemyMissiles.push_back(missile);
 
 	fireSound.play();
 
@@ -545,7 +643,11 @@ void reset() {
 		delete (missile);
 	}
 
+	for (EnemyMissile* missile : enemyMissiles) {
+		delete (missile);
+	}
+
 	enemies.clear();
 	missiles.clear();
-
+	enemyMissiles.clear();
 }

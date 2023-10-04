@@ -19,12 +19,14 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\EnemyMissile.cpp" />
     <ClCompile Include="src\Missile.cpp" />
     <ClCompile Include="src\Enemy.cpp" />
     <ClCompile Include="src\Hero.cpp" />
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\EnemyMissile.h" />
     <ClInclude Include="src\Missile.h" />
     <ClInclude Include="src\Enemy.h" />
     <ClInclude Include="src\Hero.h" />

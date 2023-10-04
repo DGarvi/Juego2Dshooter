@@ -38,3 +38,4 @@ sf::Sprite Enemy::getSprite() {
 
 	return m_sprite;
 }
+
