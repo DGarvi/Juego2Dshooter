@@ -33,6 +33,7 @@ std::vector<Missile*> missiles;
 std::vector<EnemyMissile*> enemyMissiles;
 
 float currentTime;
+float prevTime2 = 0.0f;
 float prevTime = 0.0f;
 float currentTimeBullet;
 float prevTimeBullet = 0.0f;
@@ -47,12 +48,12 @@ bool playerMovingDown = false;
 bool playerMovingLeft = false;
 bool playerMovingRight = false;
 
-int enemySpeed = 100;
+int enemySpeed = 50;
 int maxSpeed = 300;
-float spawnRate = 1.50f;
-float minSpawnRate = 0.50f;
-float enemyFireRate = 0.30f;
-float enemyBulletSpeed = 500.0f;
+float spawnRate = 3.50f;
+float minSpawnRate = 2.50f;
+float enemyFireRate = 0.50f;
+float enemyBulletSpeed = 50.0f;
 bool enemyShootAllowed = false;
 
 int score = 0;
@@ -75,7 +76,6 @@ bool playerMoving = false;
 void shoot(sf::Vector2f playerPos, sf::Vector2i mousePos);
 bool checkCollisionBullet(sf::Sprite sprite1, sf::Sprite sprite2);
 bool checkCollisionHero(sf::Sprite sprite1, sf::Sprite sprite2);
-void enemyShoot(sf::Vector2f playerPos, sf::Vector2f enemyPos);
 
 void reset();
 
@@ -88,17 +88,6 @@ void init() {
 	
 	bgTexture.loadFromFile("Assets/graphics/bg.png");
 	bgSprite.setTexture(bgTexture);
-
-	headingFont.loadFromFile("Assets/fonts/SnackerComic.ttf");
-
-	headingText.setFont(headingFont);
-	headingText.setString("Chica Bazooka");
-	headingText.setCharacterSize(84);
-	headingText.setFillColor(sf::Color::White);
-
-	sf::FloatRect headingBounds = headingText.getLocalBounds();
-	headingText.setOrigin(headingBounds.width / 2, headingBounds.height / 2);
-	headingText.setPosition(sf::Vector2f(viewSize.x * 0.5f, viewSize.y * 0.10f));
 
 	scoreFont.loadFromFile("Assets/fonts/Arial.ttf");
 
@@ -123,7 +112,7 @@ void init() {
 	tutorialText.setFont(scoreFont);
 	tutorialText.setString("Pulsa Click Izquierdo para DISPARAR y apunta con el Ratón\n\n Pulsa W A S D para MOVERTE\n\n\n Haz click para empezar");
 	tutorialText.setCharacterSize(32);
-	tutorialText.setFillColor(sf::Color::White);
+	tutorialText.setFillColor(sf::Color::Magenta);
 
 	sf::FloatRect tutorialBounds = tutorialText.getLocalBounds();
 	tutorialText.setOrigin(tutorialBounds.width / 2, tutorialBounds.height / 2);
@@ -304,7 +293,7 @@ void updateInput(float dtb) {
 void update(float dt) {
 	hero.update(dt);
 	currentTime += dt;
-
+	//currentTime2 += dt;
 
 	if (playerMovingDown) {
 		hero.move(0, heroSpeed * dt);
@@ -328,7 +317,6 @@ void update(float dt) {
 		prevTime = currentTime;
 		enemySpeed = enemySpeed + 20;
 		spawnRate = spawnRate - 0.10f;
-		enemyShootAllowed = true;
 
 		if (enemySpeed > maxSpeed) {
 			enemySpeed = maxSpeed;
@@ -340,38 +328,45 @@ void update(float dt) {
 
 	}
 	
-
-		
-	
-
 	for (int i = 0; i < enemies.size(); i++) {
 
 		
-
 		Enemy* enemy = enemies[i];
-
+		
 		sf::Vector2f heroPos = sf::Vector2f(hero.getSprite().getPosition().x, hero.getSprite().getPosition().y);
 
-		sf::Vector2f enemyPos = sf::Vector2f(enemies[i]->getSprite().getPosition().x, enemies[i]->getSprite().getPosition().y);
+		sf::Vector2f enemyPos = sf::Vector2f(enemy->getSprite().getPosition().x, enemy->getSprite().getPosition().y);
 		
 		enemy->update(hero.getSprite().getPosition().x, hero.getSprite().getPosition().y, enemySpeed, dt);
 		
-
+		enemy->enemyTimer += dt;
 		
-			if (currentTime >= prevTime + enemyFireRate && enemyShootAllowed) {
+		
+		for (int i = 0; i < enemies.size(); i++) {
 
-				enemyShoot(heroPos, enemyPos);
-				enemyShootAllowed = false;
+			Enemy* enemy = enemies[i];
+
+		   // if (enemy->enemyTimer >= prevTime2 + enemyFireRate) {
+				enemy->enemyShoot(heroPos, enemyPos, enemyBulletSpeed, enemyMissiles);
+				
+				//enemy->enemyShootAllowed = true;
+				//prevTime2 = enemy->enemyTimer;
+			//}
+		
+			
 			}
-		
-		
+		/*
 			if (currentTime >= prevTime + 2 * enemyFireRate && enemyShootAllowed) {
 
 				enemyShoot(heroPos, enemyPos);
-				enemyShootAllowed = false;
+				
 			}
+			*/
 		
 	}
+
+
+
 
 	for (int i = 0; i < enemyMissiles.size(); i++) {
 
@@ -503,44 +498,7 @@ void shoot(sf::Vector2f playerPos, sf::Vector2i mousePos) {
 
 }
 
-void enemyShoot(sf::Vector2f playerPos, sf::Vector2f enemyPos) {
 
-	float missileSpeedx;
-	float missileSpeedy;
-
-	float mag = sqrt(((playerPos.x) * (playerPos.x)) + ((playerPos.y) * (playerPos.y)));
-
-
-	if (playerPos.x > enemyPos.x) {
-		missileSpeedx = enemyBulletSpeed * -(((enemyPos.x - playerPos.x)) / mag);
-
-	}
-	else {
-		missileSpeedx = enemyBulletSpeed * -(((enemyPos.x - playerPos.x)) / mag);
-
-	}
-
-
-	if (playerPos.y > enemyPos.y) {
-		missileSpeedy = enemyBulletSpeed * -(((enemyPos.y - playerPos.y)) / mag);
-
-	}
-	else {
-		missileSpeedy = enemyBulletSpeed * -(((enemyPos.y - playerPos.y)) / mag);
-
-	}
-
-
-	EnemyMissile* missile = new EnemyMissile();
-
-	missile->init("Assets/graphics/rocket.png", sf::Vector2f(enemyPos.x, enemyPos.y),
-		missileSpeedx, missileSpeedy);
-
-	enemyMissiles.push_back(missile);
-
-	fireSound.play();
-
-}
 
 bool checkCollisionHero(sf::Sprite sprite1, sf::Sprite sprite2) {
 
@@ -630,7 +588,14 @@ void reset() {
 	ammo = 10;
 	enemySpeed = 50;
 	scoreText.setString("Puntuación: 0");
-	ammoText.setString("Munición: 3");
+	ammoText.setString("Munición: 10");
+	enemySpeed = 100;
+	spawnRate = 1.50f;
+	enemyFireRate = 0.30f;
+	enemyBulletSpeed = 500.0f;
+	enemyShootAllowed = false;
+
+
 
 	hero.~Hero();
 	hero.init("Assets/graphics/heroAnim.png", 4, 1.0f, sf::Vector2f(viewSize.x * 0.25f, viewSize.y * 0.5f));

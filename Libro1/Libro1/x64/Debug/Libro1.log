@@ -1,36 +1,13 @@
-﻿  Enemy.cpp
-D:\Git\Libro1\Libro1\Libro1\src\Enemy.cpp(15,70): warning C4244: 'argument': conversion from 'T' to 'float', possible loss of data
-          with
-          [
-              T=unsigned int
-          ]
-D:\Git\Libro1\Libro1\Libro1\src\Enemy.cpp(15,43): warning C4244: 'argument': conversion from 'T' to 'float', possible loss of data
-          with
-          [
-              T=unsigned int
-          ]
-  EnemyMissile.cpp
-D:\Git\Libro1\Libro1\Libro1\src\EnemyMissile.cpp(20,70): warning C4244: 'argument': conversion from 'T' to 'float', possible loss of data
-          with
-          [
-              T=unsigned int
-          ]
-D:\Git\Libro1\Libro1\Libro1\src\EnemyMissile.cpp(20,43): warning C4244: 'argument': conversion from 'T' to 'float', possible loss of data
-          with
-          [
-              T=unsigned int
-          ]
-  main.cpp
-D:\Git\Libro1\Libro1\Libro1\src\main.cpp(19,38): warning C4244: 'argument': conversion from 'T' to 'unsigned int', possible loss of data
+﻿  main.cpp
+C:\dev\Libro1\Libro1\Libro1\src\main.cpp(19,38): warning C4244: 'argument': conversion from 'T' to 'unsigned int', possible loss of data
           with
           [
               T=float
           ]
-D:\Git\Libro1\Libro1\Libro1\src\main.cpp(19,26): warning C4244: 'argument': conversion from 'T' to 'unsigned int', possible loss of data
+C:\dev\Libro1\Libro1\Libro1\src\main.cpp(19,26): warning C4244: 'argument': conversion from 'T' to 'unsigned int', possible loss of data
           with
           [
               T=float
           ]
-D:\Git\Libro1\Libro1\Libro1\src\main.cpp(357,85): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-  Generating Code...
-  Libro1.vcxproj -> D:\Git\Libro1\Libro1\x64\Debug\Libro1.exe
+C:\dev\Libro1\Libro1\Libro1\src\main.cpp(340,85): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+  Libro1.vcxproj -> C:\dev\Libro1\Libro1\x64\Debug\Libro1.exe

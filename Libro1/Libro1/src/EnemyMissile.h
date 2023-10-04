@@ -15,7 +15,6 @@ public:
 
 	void update(float dt);
 	sf::Sprite getSprite();
-	void enemyShoot(sf::Vector2f playerPos, sf::Vector2f enemyPos);
 
 private:
 

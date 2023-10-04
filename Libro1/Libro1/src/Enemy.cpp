@@ -7,6 +7,9 @@ Enemy::~Enemy() {};
 void Enemy::init(std::string textureName, sf::Vector2f position) {
 
 	m_position = position;
+	enemyShootAllowed = true;
+	enemyTimer = 0.0f;
+	
 
 	m_texture.loadFromFile(textureName.c_str());
 
