@@ -1,13 +1,12 @@
-﻿  main.cpp
-C:\dev\Libro1\Libro1\Libro1\src\main.cpp(19,38): warning C4244: 'argument': conversion from 'T' to 'unsigned int', possible loss of data
+﻿  Enemy.cpp
+D:\Git\Libro1\Libro1\Libro1\src\Enemy.cpp(19,72): warning C4244: 'argument': conversion from 'T' to 'float', possible loss of data
           with
           [
-              T=float
+              T=unsigned int
           ]
-C:\dev\Libro1\Libro1\Libro1\src\main.cpp(19,26): warning C4244: 'argument': conversion from 'T' to 'unsigned int', possible loss of data
+D:\Git\Libro1\Libro1\Libro1\src\Enemy.cpp(19,45): warning C4244: 'argument': conversion from 'T' to 'float', possible loss of data
           with
           [
-              T=float
+              T=unsigned int
           ]
-C:\dev\Libro1\Libro1\Libro1\src\main.cpp(340,85): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-  Libro1.vcxproj -> C:\dev\Libro1\Libro1\x64\Debug\Libro1.exe
+  Libro1.vcxproj -> D:\Git\Libro1\Libro1\x64\Debug\Libro1.exe

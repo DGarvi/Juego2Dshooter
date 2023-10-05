@@ -8,56 +8,55 @@
 #include "Missile.h"
 #include "EnemyMissile.h"
 
+//SOUND BUFFERS
 //sf::Music bgMusic;
 sf::SoundBuffer fireBuffer;
 sf::SoundBuffer hitBuffer;
 
-sf::Sound fireSound(fireBuffer);
-sf::Sound hitSound(hitBuffer);
+sf::Sound fireSound	(fireBuffer);
+sf::Sound hitSound	(hitBuffer);
 
-sf::Vector2f viewSize(1024, 768);
-sf::VideoMode vm(viewSize.x, viewSize.y);
-sf::RenderWindow window(vm, "SFML Game", sf::Style::Default);
+//WINDOW RENDER PARAMETERS
+sf::Vector2f     viewSize	(1024, 768);
+sf::VideoMode    vm			(viewSize.x, viewSize.y);
+sf::RenderWindow window		(vm, "SFML Game", sf::Style::Default);
 
-
+//SPRITE AND TEXTURE
 sf::Texture skyTexture;
-sf::Sprite skySprite;
+sf::Sprite  skySprite;
 
 sf::Texture bgTexture;
-sf::Sprite bgSprite;
+sf::Sprite  bgSprite;
 
 Hero hero;
 
-std::vector<Enemy*> enemies;
-std::vector<Missile*> missiles;
+std::vector<Enemy*>        enemies;
+std::vector<Missile*>      missiles;
 std::vector<EnemyMissile*> enemyMissiles;
 
 float currentTime;
-float prevTime2 = 0.0f;
-float prevTime = 0.0f;
+float prevTime              = 0.0f;
 float currentTimeBullet;
-float prevTimeBullet = 0.0f;
+float prevTimeBullet		= 0.0f;
 
-float cadence = 0.20f;
-int ammo = 10;
-float bulletSpeed = 2000.0f;
+float cadence				= 0.20f;
+int   ammo					= 10;
+float bulletSpeed			= 2000.0f;
 
-float heroSpeed = 400.0f;
-bool playerMovingUp = false;
-bool playerMovingDown = false;
-bool playerMovingLeft = false;
-bool playerMovingRight = false;
+float heroSpeed				= 400.0f;
+bool  playerMovingUp		= false;
+bool  playerMovingDown		= false;
+bool  playerMovingLeft		= false;
+bool  playerMovingRight		= false;
 
-int enemySpeed = 50;
-int maxSpeed = 300;
-float spawnRate = 3.50f;
-float minSpawnRate = 2.50f;
-float enemyFireRate = 0.50f;
-float enemyBulletSpeed = 50.0f;
-bool enemyShootAllowed = false;
+float maxSpeed				= 300.0f;
+float spawnRate				= 3.0f;
+float minSpawnRate			= 1.0f;
+float enemyBulletSpeed		= 500.0f;
+bool  enemyShootAllowed		= false;
 
-int score = 0;
-bool gameover = true;
+int   score					= 0;
+bool  gameover				= true;
 
 //Text
 sf::Font headingFont;
@@ -73,97 +72,127 @@ sf::Text tutorialText;
 sf::Vector2f playerPosition;
 bool playerMoving = false;
 
-void shoot(sf::Vector2f playerPos, sf::Vector2i mousePos);
-bool checkCollisionBullet(sf::Sprite sprite1, sf::Sprite sprite2);
-bool checkCollisionHero(sf::Sprite sprite1, sf::Sprite sprite2);
+sf::Vector2i mousePos;
 
+void shoot					(sf::Vector2f playerPos	, sf::Vector2i mousePos);
+bool checkCollisionBullet	(sf::Sprite sprite1		, sf::Sprite sprite2);
+bool checkCollisionHero		(sf::Sprite sprite1		, sf::Sprite sprite2);
+void enemyShoot				(sf::Vector2f playerPos	, sf::Vector2f enemyPos);
 void reset();
 
-sf::Vector2i mousePos;
 
 void init() {
 
-	skyTexture.loadFromFile("Assets/graphics/sky.png");
-	skySprite.setTexture(skyTexture);
+	//TEXTURE LOAD
+	skyTexture.loadFromFile		("Assets/graphics/sky.png");
+	skySprite.setTexture		(skyTexture);
 	
-	bgTexture.loadFromFile("Assets/graphics/bg.png");
-	bgSprite.setTexture(bgTexture);
+	bgTexture.loadFromFile		("Assets/graphics/bg.png");
+	bgSprite.setTexture			(bgTexture);
 
-	scoreFont.loadFromFile("Assets/fonts/Arial.ttf");
+	scoreFont.loadFromFile		("Assets/fonts/Arial.ttf");
 
-	scoreText.setFont(scoreFont);
-	scoreText.setString("Puntuación: 0");
-	scoreText.setCharacterSize(45);
-	scoreText.setFillColor(sf::Color::White);
+	//SCORE TEXT LOAD
+	scoreText.setFont			(scoreFont);
+	scoreText.setString			("Puntuación: 0");
+	scoreText.setCharacterSize	(45);
+	scoreText.setFillColor		(sf::Color::White);
 
 	sf::FloatRect scoreBounds = scoreText.getLocalBounds();
-	scoreText.setOrigin(scoreBounds.width / 2, scoreBounds.height / 2);
-	scoreText.setPosition(sf::Vector2f(viewSize.x * 0.5f, viewSize.y * 0.20f));
 
-	ammoText.setFont(scoreFont);
-	ammoText.setString("Puntuación: 0");
-	ammoText.setCharacterSize(45);
-	ammoText.setFillColor(sf::Color::White);
+	scoreText.setOrigin			(scoreBounds.width / 2, scoreBounds.height / 2);
+	scoreText.setPosition		(sf::Vector2f(viewSize.x * 0.5f, viewSize.y * 0.20f));
 
-	sf::FloatRect ammoBounds = ammoText.getLocalBounds();
-	ammoText.setOrigin(ammoBounds.width / 2, ammoBounds.height / 2);
-	ammoText.setPosition(sf::Vector2f(200.0f, viewSize.y * 0.85f));
+	//AMMO TEXT LOAD
+	ammoText.setFont			(scoreFont);
+	ammoText.setString			("Puntuación: 0");
+	ammoText.setCharacterSize	(45);
+	ammoText.setFillColor		(sf::Color::White);
 
-	tutorialText.setFont(scoreFont);
-	tutorialText.setString("Pulsa Click Izquierdo para DISPARAR y apunta con el Ratón\n\n Pulsa W A S D para MOVERTE\n\n\n Haz click para empezar");
+	sf::FloatRect ammoBounds =	ammoText.getLocalBounds();
+	ammoText.setOrigin			(ammoBounds.width / 2, ammoBounds.height / 2);
+	ammoText.setPosition		(sf::Vector2f(200.0f, viewSize.y * 0.85f));
+
+	//TUTORIAL TEXT LOAD
+	tutorialText.setFont		(scoreFont);
+	tutorialText.setString		("Pulsa Click Izquierdo para DISPARAR y apunta con el Ratón\n\n Pulsa W A S D para MOVERTE\n\n\n Haz click para empezar");
 	tutorialText.setCharacterSize(32);
-	tutorialText.setFillColor(sf::Color::Magenta);
+	tutorialText.setFillColor	(sf::Color::Magenta);
 
 	sf::FloatRect tutorialBounds = tutorialText.getLocalBounds();
-	tutorialText.setOrigin(tutorialBounds.width / 2, tutorialBounds.height / 2);
-	tutorialText.setPosition(sf::Vector2f(viewSize.x * 0.5f, viewSize.y * 0.45f));
+	tutorialText.setOrigin		(tutorialBounds.width / 2, tutorialBounds.height / 2);
+	tutorialText.setPosition	(sf::Vector2f(viewSize.x * 0.5f, viewSize.y * 0.45f));
 
-	//Audio
+	//BACKGROUND MUSIC
 	//bgMusic.openFromFile("Assets/audio/bgMusic.ogg");
 	//bgMusic.play();
 
+	//HIT SOUND LOAD
 	hitBuffer.loadFromFile("Assets/audio/hit.ogg");
 	fireBuffer.loadFromFile("Assets/audio/fire.ogg");
 
-	hero.init("Assets/graphics/heroAnim.png", 4, 1.0f, sf::Vector2f(viewSize.x * 0.25f, viewSize.y * 0.5f));
+	//HERO LOAD
+	hero.init("Assets/graphics/heroAnim.png", 4, 1.0f, sf::Vector2f(viewSize.x * 0.5f, viewSize.y * 0.5f));
 
+	//TIMER LOAD
 	srand((int)time(0));
 }
 
 void spawnEnemy() {
 
-	int randLoc = rand() % 4;
+	int randLoc =	rand() % 8;
+	sf::Vector2f	enemyPos;
 
-	sf::Vector2f enemyPos;
-
+	//DIFFERENT ENEMY SPAWN POINTS
 	if (enemies.size() < 10){
 
-	switch (randLoc) {
+		switch (randLoc) {
 
-	case 0: enemyPos = sf::Vector2f(viewSize.x * 0.75f, viewSize.y);
-		
-		break;
+			case 0: enemyPos = sf::Vector2f(viewSize.x * 0.50f, viewSize.y);		
+			break;
 	
-	case 1: enemyPos = sf::Vector2f(viewSize.x, viewSize.y * 0.60f);
-		
-		break;
+			case 1: enemyPos = sf::Vector2f(viewSize.x * 0.50f, 0);		
+			break;
 
-	case 2: enemyPos = sf::Vector2f(viewSize.x, viewSize.y * 0.40f);
-		
-		break;
+			case 2: enemyPos = sf::Vector2f(viewSize.x, viewSize.y * 0.50f);		
+			break;
 	
-	case 3: enemyPos = sf::Vector2f(viewSize.x * 0.40f, viewSize.y);
+			case 3: enemyPos = sf::Vector2f(0, viewSize.y * 0.50f);
+			break;
 
-		break;
+			case 4: enemyPos = sf::Vector2f(viewSize.x, viewSize.y);
+			break;
 
-	default: printf("Incorrect y Value \n");
-		return;
+			case 5: enemyPos = sf::Vector2f(0, viewSize.y);
+			break;
+			
+			case 6: enemyPos = sf::Vector2f(viewSize.x, 0);
+			break;
+			
+			case 7: enemyPos = sf::Vector2f(0, 0);
+			break;
 
-	}
+			default: printf("Incorrect y Value \n");
+			return;
 
+		}
 
 	Enemy* enemy = new Enemy();
 	enemy->init("Assets/graphics/enemy.png", enemyPos);
+
+		//INCREASE SPEED IN FUTURE ENEMIES PER SCORE
+		if (100 + score * 5.0f < maxSpeed){
+			
+			enemy->enemySpeed += score * 5.0f;
+			std::cout << enemy->enemySpeed << std::endl;
+		
+		}
+		else {
+			
+			enemy->enemySpeed = maxSpeed;
+			std::cout << enemy->enemySpeed << std::endl;
+		
+		}
 
 	enemies.push_back(enemy);
 	
@@ -174,10 +203,10 @@ void spawnEnemy() {
 
 void draw() {
 
-	window.draw(skySprite);
-	window.draw(bgSprite);
-	
-	window.draw(hero.getSprite());
+	//DRAW 
+	window.draw	(skySprite);
+	window.draw	(bgSprite);
+	window.draw	(hero.getSprite());
 
 	for (Enemy* enemy : enemies) {
 		window.draw(enemy->getSprite());
@@ -208,12 +237,10 @@ void updateInput(float dtb) {
 	
 	currentTimeBullet += dtb;
 
-	//while pending events
+	//WHILE PENDING EVENTS
 	while (window.pollEvent(event)) {
 	
-		
-		
-		
+		//MOVE HERO	
 		if (event.type == sf::Event::KeyPressed) {
 			if (event.key.code == sf::Keyboard::W) {
 				playerMovingUp = true;
@@ -222,13 +249,13 @@ void updateInput(float dtb) {
 				playerMovingLeft = true;
 			}
 			if (event.key.code == sf::Keyboard::D) {
-				playerMovingRight = true;
+				playerMovingRight = true;	
 			}
 			if (event.key.code == sf::Keyboard::S) {
 				playerMovingDown = true;
 			}
 		}
-		
+		//STOP HERO
 		if (event.type == sf::Event::KeyReleased) {
 			if (event.key.code == sf::Keyboard::W) {
 				playerMovingUp = false;
@@ -243,57 +270,63 @@ void updateInput(float dtb) {
 				playerMovingDown = false;
 			}
 
-		}
+		}	
 
-		
-
-			if (event.type == sf::Event::MouseButtonPressed) {
-				if (event.key.code == sf::Mouse::Left) {
+		//START GAME/SHOOT WHEN CLICK
+		if (event.type == sf::Event::MouseButtonPressed) {
+			
+			if (event.key.code == sf::Mouse::Left) {
 					
-					if (gameover) {
+				if (gameover) {
 
-						gameover = false;
-						reset();
+					gameover = false;
+					reset();
 
-					}
-					else {
-						if (currentTimeBullet >= prevTimeBullet + cadence) {
-							if(ammo > 0){
+				}
+				else {
+				
+					if (currentTimeBullet >= prevTimeBullet + cadence) {
+						
+						if(ammo > 0){
 								
-								mousePos = sf::Mouse::getPosition(window);
-
-								shoot(hero.getSprite().getPosition(), mousePos);
-								ammo--;
+							mousePos =	sf::Mouse::getPosition(window);
+							shoot		(hero.getSprite().getPosition(), mousePos);
+							ammo--;
 								
-								std::string finalAmmo = "Munición: " + std::to_string(ammo);
-								ammoText.setString(finalAmmo);
-								sf::FloatRect ammoBounds = ammoText.getLocalBounds();
-								ammoText.setOrigin(ammoBounds.width / 2, ammoBounds.height / 2);
-								ammoText.setPosition(sf::Vector2f(200.0f, viewSize.y * 0.85f));
+							std::string finalAmmo =			"Munición: " + std::to_string(ammo);
+							ammoText.setString				(finalAmmo);
+							sf::FloatRect ammoBounds =		ammoText.getLocalBounds();
+							ammoText.setOrigin				(ammoBounds.width / 2	, ammoBounds.height / 2);
+							ammoText.setPosition			(sf::Vector2f(200.0f	, viewSize.y * 0.85f));
 								
-								prevTimeBullet = currentTimeBullet;
-							}
+							prevTimeBullet = currentTimeBullet;
+							
 						}
-
 					}
 				}
-
 			}
-
-			if (event.type == sf::Event::Closed)
-				window.close();
-
-			if (event.key.code == sf::Keyboard::Escape)
-				gameover = true;
+		}
+		//CLOSE WINDOW ON TOP RIGHT X
+		if (event.type == sf::Event::Closed){
+		
+			window.close();
+		
+		}
+		//EXIT CURRENT GAME
+		if (event.key.code == sf::Keyboard::Escape){
+			
+			gameover = true;
+		
+		}
 
 	}
 
 }
 
 void update(float dt) {
-	hero.update(dt);
+	
+	hero.update(dt, viewSize, playerMovingRight, playerMovingLeft);
 	currentTime += dt;
-	//currentTime2 += dt;
 
 	if (playerMovingDown) {
 		hero.move(0, heroSpeed * dt);
@@ -308,20 +341,13 @@ void update(float dt) {
 		hero.move(heroSpeed * dt, 0);
 	}
 
-
 	if (currentTime >= prevTime + spawnRate) {
-		
-		
+			
 		spawnEnemy();
-		std::cout << enemySpeed << std::endl;
+		
 		prevTime = currentTime;
-		enemySpeed = enemySpeed + 20;
 		spawnRate = spawnRate - 0.10f;
-
-		if (enemySpeed > maxSpeed) {
-			enemySpeed = maxSpeed;
-		}
-
+		
 		if (spawnRate < minSpawnRate) {
 			spawnRate = minSpawnRate;
 		}
@@ -329,44 +355,28 @@ void update(float dt) {
 	}
 	
 	for (int i = 0; i < enemies.size(); i++) {
-
 		
 		Enemy* enemy = enemies[i];
-		
-		sf::Vector2f heroPos = sf::Vector2f(hero.getSprite().getPosition().x, hero.getSprite().getPosition().y);
 
-		sf::Vector2f enemyPos = sf::Vector2f(enemy->getSprite().getPosition().x, enemy->getSprite().getPosition().y);
+		sf::Vector2f heroPos	=			sf::Vector2f(hero.getSprite().getPosition().x	, hero.getSprite().getPosition().y);
+		sf::Vector2f enemyPos	=			sf::Vector2f(enemy->getSprite().getPosition().x	, enemy->getSprite().getPosition().y);	
+		enemy->update						(hero.getSprite().getPosition().x, hero.getSprite().getPosition().y, enemy->enemySpeed, dt);
+		enemy->enemyTimer		+= dt;
 		
-		enemy->update(hero.getSprite().getPosition().x, hero.getSprite().getPosition().y, enemySpeed, dt);
-		
-		enemy->enemyTimer += dt;
-		
-		
-		for (int i = 0; i < enemies.size(); i++) {
-
-			Enemy* enemy = enemies[i];
-
-		   // if (enemy->enemyTimer >= prevTime2 + enemyFireRate) {
-				enemy->enemyShoot(heroPos, enemyPos, enemyBulletSpeed, enemyMissiles);
+		if (enemy->enemyTimer >= enemy->enemyPrevTime + enemy->enemyFireRate) {
 				
-				//enemy->enemyShootAllowed = true;
-				//prevTime2 = enemy->enemyTimer;
-			//}
-		
+			enemy->enemyShootAllowed = true;
+			enemy->enemyPrevTime	 = enemy->enemyTimer;
 			
-			}
-		/*
-			if (currentTime >= prevTime + 2 * enemyFireRate && enemyShootAllowed) {
+		}
+					
+		if (enemy->enemyShootAllowed) {
 
-				enemyShoot(heroPos, enemyPos);
-				
-			}
-			*/
-		
+			enemyShoot(heroPos, enemyPos);			
+			enemy->enemyShootAllowed = false;
+			
+		}				
 	}
-
-
-
 
 	for (int i = 0; i < enemyMissiles.size(); i++) {
 
@@ -385,7 +395,6 @@ void update(float dt) {
 	for (int i = 0; i < missiles.size(); i++) {
 
 		Missile* missile = missiles[i];
-
 		missile->update(dt);
 
 		if (missile->getSprite().getPosition().x > viewSize.x) {
@@ -399,7 +408,6 @@ void update(float dt) {
 	for (int i = 0; i < enemies.size(); i++) {
 
 		Enemy* enemy = enemies[i];
-
 
 		if (checkCollisionHero(hero.getSprite(), enemy->getSprite())) {
 
@@ -420,8 +428,8 @@ void update(float dt) {
 		}
 	}
 
-
 	 for (int j = 0; j < enemies.size(); j++) {
+		 
 		 for (int i = 0; i < missiles.size(); i++) {
 			
 			Missile* missile = missiles[i];
@@ -433,64 +441,42 @@ void update(float dt) {
 				score++;
 				ammo++;
 
-				std::string finalScore = "Puntuación: " + std::to_string(score);
+				std::string finalScore				= "Puntuación: " + std::to_string(score);
 				scoreText.setString(finalScore);
-				sf::FloatRect scoreBounds = scoreText.getLocalBounds();
-				scoreText.setOrigin(scoreBounds.width / 2, scoreBounds.height / 2);
-				scoreText.setPosition(sf::Vector2f(viewSize.x * 0.5f, viewSize.y * 0.10f));
+				sf::FloatRect scoreBounds			= scoreText.getLocalBounds();
+				scoreText.setOrigin					(scoreBounds.width / 2	, scoreBounds.height / 2);
+				scoreText.setPosition(sf::Vector2f	(viewSize.x * 0.5f		, viewSize.y * 0.10f));
 
-				std::string finalAmmo = "Munición: " + std::to_string(ammo);
+				std::string finalAmmo				= "Munición: "	 + std::to_string(ammo);
 				ammoText.setString(finalAmmo);
-				sf::FloatRect ammoBounds = ammoText.getLocalBounds();
-				ammoText.setOrigin(ammoBounds.width / 2, ammoBounds.height / 2);
-				ammoText.setPosition(sf::Vector2f(200.0f, viewSize.y * 0.85f));
+				sf::FloatRect ammoBounds			= ammoText.getLocalBounds();
+				ammoText.setOrigin					(ammoBounds.width / 2	, ammoBounds.height / 2);
+				ammoText.setPosition(sf::Vector2f	(200.0f					, viewSize.y * 0.85f));
 
-				missiles.erase(missiles.begin() + i);
-				enemies.erase(enemies.begin() + j);
-
+				missiles.erase	(missiles.begin() + i);
+				enemies.erase	(enemies.begin()  + j);
 
 				delete(missile);
 				delete(enemy);
 
-
 			}
 		}
 	}
-
-
 }
 
 void shoot(sf::Vector2f playerPos, sf::Vector2i mousePos) {
 	
 	float missileSpeedx;
 	float missileSpeedy;
-		
-	float mag = sqrt (((mousePos.x - playerPos.x) * (mousePos.x - playerPos.x)) + ((mousePos.y - playerPos.y) * (mousePos.y - playerPos.y)));
-
-	if (playerPos.x > mousePos.x) {
-		missileSpeedx = bulletSpeed *  (((mousePos.x - playerPos.x)) / mag);
-
-	}
-	else {
-		missileSpeedx = bulletSpeed *   (((mousePos.x - playerPos.x)) / mag);
-
-	}
+	float mag		= sqrt (((mousePos.x - playerPos.x) * (mousePos.x - playerPos.x)) + ((mousePos.y - playerPos.y) * (mousePos.y - playerPos.y)));
 	
-	
-	if (playerPos.y > mousePos.y) {
-		missileSpeedy = bulletSpeed *   (((mousePos.y - playerPos.y)) / mag);
-
-	}
-	else {
-		missileSpeedy = bulletSpeed *    (((mousePos.y - playerPos.y)) / mag);
-
-	}
+	missileSpeedx	= bulletSpeed *   (((mousePos.x - playerPos.x)) / mag);
+	missileSpeedy	= bulletSpeed *   (((mousePos.y - playerPos.y)) / mag);
 
 	
 	Missile* missile = new Missile();
 
-	missile->init("Assets/graphics/rocket.png", sf::Vector2f(hero.getSprite().getPosition().x, hero.getSprite().getPosition().y),
-		 missileSpeedx, missileSpeedy);
+	missile->init("Assets/graphics/rocket.png", sf::Vector2f(hero.getSprite().getPosition().x, hero.getSprite().getPosition().y), missileSpeedx, missileSpeedy);
 	
 	missiles.push_back(missile);
 
@@ -498,7 +484,25 @@ void shoot(sf::Vector2f playerPos, sf::Vector2i mousePos) {
 
 }
 
+void enemyShoot(sf::Vector2f playerPos, sf::Vector2f enemyPos) {
 
+	float missileSpeedx;
+	float missileSpeedy;
+
+	float mag		= sqrt(((playerPos.x - enemyPos.x ) * (playerPos.x - enemyPos.x)) + ((playerPos.y - enemyPos.y) * (playerPos.y - enemyPos.y)));
+
+	missileSpeedx	= enemyBulletSpeed * (((playerPos.x - enemyPos.x)) / mag);
+	missileSpeedy	= enemyBulletSpeed * (((playerPos.y - enemyPos.y)) / mag);
+
+	EnemyMissile* missile = new EnemyMissile();
+
+	missile->init("Assets/graphics/rocket.png", sf::Vector2f(enemyPos.x, enemyPos.y), missileSpeedx, missileSpeedy);
+
+	enemyMissiles.push_back(missile);
+
+	fireSound.play();
+
+}
 
 bool checkCollisionHero(sf::Sprite sprite1, sf::Sprite sprite2) {
 
@@ -535,70 +539,66 @@ bool checkCollisionBullet(sf::Sprite sprite1, sf::Sprite sprite2) {
 	if (shape1.intersects(shape2)) {
 
 		return true;
+	
 	}
 	else {
 
 		return false;
+	
 	}
 
 }
 
 int main() {
+
 	sf::Clock clock;
 	sf::Clock bulletClock;
-	//Inicializar objetos
+	
+	//INITIALIZE OBJECTS
 	init();
 
-
-	//Abrir window
+	//OPEN WINDOW
 	while (window.isOpen()) {
 
-
-		//Keyboard events
+		//KEYBOARD EVENTS
 		sf::Time dtb = bulletClock.restart();
 		updateInput(dtb.asSeconds());
 
-		//Update game
+		//UPDATE GAME
 		sf::Time dt = clock.restart();
 		
 		if (!gameover) {
+			
 			update(dt.asSeconds());
-		}
-		//Update game objects
-		window.clear(sf::Color::Red);
 		
+		}
+		//UPDATE GAME OBJECTS
+		window.clear(sf::Color::Black);
 		draw();
 		
-		//Render game objects
+		//RENDER
 		window.display();
 
 	}
 
-	return 0;
 }
 
 
 void reset() {
 
-	score = 0;
-	currentTime = 0.0f;
-	prevTime = 0.0f;
-	currentTimeBullet = 0.0f;
-	prevTimeBullet = 0.0f;
-	ammo = 10;
-	enemySpeed = 50;
-	scoreText.setString("Puntuación: 0");
-	ammoText.setString("Munición: 10");
-	enemySpeed = 100;
-	spawnRate = 1.50f;
-	enemyFireRate = 0.30f;
-	enemyBulletSpeed = 500.0f;
-	enemyShootAllowed = false;
-
-
+	score				= 0;
+	currentTime			= 0.0f;
+	prevTime			= 0.0f;
+	currentTimeBullet	= 0.0f;
+	prevTimeBullet		= 0.0f;
+	ammo				= 10;
+	scoreText.setString ("Puntuación: 0");
+	ammoText.setString	("Munición: 10");
+	spawnRate			= 1.50f;
+	enemyBulletSpeed	= 500.0f;
 
 	hero.~Hero();
-	hero.init("Assets/graphics/heroAnim.png", 4, 1.0f, sf::Vector2f(viewSize.x * 0.25f, viewSize.y * 0.5f));
+	hero.init("Assets/graphics/heroAnim.png", 4, 1.0f, sf::Vector2f(viewSize.x * 0.5f, viewSize.y * 0.5f));
 
 	for (Enemy* enemy : enemies) {
 		delete (enemy);
