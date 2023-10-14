@@ -13,7 +13,7 @@ void Hero::init(std::string textureName, int frameCount, float animDuration, sf:
 	m_texture.loadFromFile(textureName.c_str());
 	m_spriteSize	= sf::Vector2i(92, 126);
 
-	//Create sprite and attack texture
+	//Create sprite and attach texture
 	m_sprite.setTexture		(m_texture);
 	m_sprite.setTextureRect	(sf::IntRect(0, 0, m_spriteSize.x, m_spriteSize.y));
 	m_sprite.setPosition	(m_position);
@@ -72,5 +72,19 @@ void Hero::move(float velocityx, float velocityy) {
 sf::Sprite Hero::getSprite() {
 
 	return m_sprite;
+
+}
+
+void Hero::setSprite(std::string sprite) {
+	
+	//Load texture
+	m_texture.loadFromFile(sprite.c_str());
+	m_spriteSize = sf::Vector2i(92, 126);
+
+	//Create sprite and attach texture
+	m_sprite.setTexture(m_texture);
+	m_sprite.setTextureRect(sf::IntRect(0, 0, m_spriteSize.x, m_spriteSize.y));
+	m_sprite.setPosition(m_position);
+	m_sprite.setOrigin(m_spriteSize.x / 2, m_spriteSize.y / 2);
 
 }

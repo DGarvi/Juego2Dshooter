@@ -1,21 +1,10 @@
-﻿  EnemyMissile.cpp
-D:\Git\Libro1\Libro1\Libro1\src\EnemyMissile.cpp(14,73): warning C4244: 'argument': conversion from 'T' to 'float', possible loss of data
+﻿  Powerup.cpp
+D:\Git\Libro1\Libro1\Libro1\src\Powerup.cpp(13,70): warning C4244: 'argument': conversion from 'T' to 'float', possible loss of data
           with
           [
               T=unsigned int
           ]
-D:\Git\Libro1\Libro1\Libro1\src\EnemyMissile.cpp(14,46): warning C4244: 'argument': conversion from 'T' to 'float', possible loss of data
-          with
-          [
-              T=unsigned int
-          ]
-  Missile.cpp
-D:\Git\Libro1\Libro1\Libro1\src\Missile.cpp(14,73): warning C4244: 'argument': conversion from 'T' to 'float', possible loss of data
-          with
-          [
-              T=unsigned int
-          ]
-D:\Git\Libro1\Libro1\Libro1\src\Missile.cpp(14,46): warning C4244: 'argument': conversion from 'T' to 'float', possible loss of data
+D:\Git\Libro1\Libro1\Libro1\src\Powerup.cpp(13,43): warning C4244: 'argument': conversion from 'T' to 'float', possible loss of data
           with
           [
               T=unsigned int
@@ -34,20 +23,32 @@ D:\Git\Libro1\Libro1\Libro1\src\Enemy.cpp(19,45): warning C4244: 'argument': con
   Hero.cpp
 D:\Git\Libro1\Libro1\Libro1\src\Hero.cpp(20,58): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
 D:\Git\Libro1\Libro1\Libro1\src\Hero.cpp(20,38): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+D:\Git\Libro1\Libro1\Libro1\src\Hero.cpp(88,56): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+D:\Git\Libro1\Libro1\Libro1\src\Hero.cpp(88,36): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
   main.cpp
-D:\Git\Libro1\Libro1\Libro1\src\main.cpp(21,41): warning C4244: 'argument': conversion from 'T' to 'unsigned int', possible loss of data
+D:\Git\Libro1\Libro1\Libro1\src\main.cpp(27,44): warning C4244: 'argument': conversion from 'T' to 'unsigned int', possible loss of data
           with
           [
               T=float
           ]
-D:\Git\Libro1\Libro1\Libro1\src\main.cpp(21,29): warning C4244: 'argument': conversion from 'T' to 'unsigned int', possible loss of data
+D:\Git\Libro1\Libro1\Libro1\src\main.cpp(27,32): warning C4244: 'argument': conversion from 'T' to 'unsigned int', possible loss of data
+          with
+          [
+              T=float
+          ]
+D:\Git\Libro1\Libro1\Libro1\src\main.cpp(132,92): warning C4244: 'return': conversion from '_Rep' to 'double', possible loss of data
+          with
+          [
+              _Rep=__int64
+          ]
+D:\Git\Libro1\Libro1\Libro1\src\main.cpp(499,49): warning C4244: 'argument': conversion from 'double' to 'T', possible loss of data
           with
           [
               T=float
           ]
   Generating code
-  222 of 375 functions (59.2%) were compiled, the rest were copied from previous compilation.
-    68 functions were new in current compilation
-    27 functions had inline decision re-evaluated but remain unchanged
+  246 of 449 functions (54.8%) were compiled, the rest were copied from previous compilation.
+    77 functions were new in current compilation
+    40 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
   Libro1.vcxproj -> D:\Git\Libro1\Libro1\x64\Release\Libro1.exe

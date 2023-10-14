@@ -2,24 +2,34 @@
 #include "SFML-2.6.0\include\SFML\Audio.hpp"
 #include <vector>
 #include <iostream>
+#include <chrono>
+#include <ctime>
+#include <windows.h>
+#include "SFML-2.6.0\include\SFML\System\Time.hpp"
 
 #include "Enemy.h"
 #include "Hero.h"
 #include "Missile.h"
 #include "EnemyMissile.h"
+#include "Powerup.h"
+#include "Enemy2.h"
 
 //SOUND BUFFERS
-//sf::Music bgMusic;
+sf::Music bgMusic;
 sf::SoundBuffer fireBuffer;
+sf::SoundBuffer fireBuffer2;
 sf::SoundBuffer hitBuffer;
+sf::SoundBuffer hit2Buffer;
 
 sf::Sound fireSound	(fireBuffer);
+sf::Sound fireSound2 (fireBuffer2);
 sf::Sound hitSound	(hitBuffer);
+sf::Sound hit2Sound (hit2Buffer);
 
 //WINDOW RENDER PARAMETERS
 sf::Vector2f     viewSize	(1024, 768);
 sf::VideoMode    vm			(viewSize.x, viewSize.y);
-sf::RenderWindow window		(vm, "SFML Game", sf::Style::Default);
+sf::RenderWindow window		(vm, "Guille vs gitanos", sf::Style::Default);
 
 //SPRITE AND TEXTURE
 sf::Texture skyTexture;
@@ -31,32 +41,50 @@ sf::Sprite  bgSprite;
 Hero hero;
 
 std::vector<Enemy*>        enemies;
+std::vector<Enemy2*>       enemies2;
 std::vector<Missile*>      missiles;
 std::vector<EnemyMissile*> enemyMissiles;
+std::vector<Powerup*>      powerups;
 
 float currentTime;
 float prevTime              = 0.0f;
+float currentTime2;
+float prevTime2				= 0.0f;
+float currentTime3;
+float prevTime3				= 0.0f;
 float currentTimeBullet;
 float prevTimeBullet		= 0.0f;
 
 float cadence				= 0.20f;
-int   ammo					= 10;
 float bulletSpeed			= 2000.0f;
 
-float heroSpeed				= 400.0f;
+float heroSpeed				= 600.0f;
 bool  playerMovingUp		= false;
 bool  playerMovingDown		= false;
 bool  playerMovingLeft		= false;
 bool  playerMovingRight		= false;
+bool  heroPowered			= false;
 
-float maxSpeed				= 300.0f;
+sf::Vector2f playerPosition;
+bool playerMoving = false;
+
+sf::Vector2i mousePos;
+
+float maxSpeed				= 200.0f;
 float spawnRate				= 3.0f;
-float minSpawnRate			= 1.0f;
-float enemyBulletSpeed		= 500.0f;
-bool  enemyShootAllowed		= false;
+float minSpawnRate			= 0.8f;
+float enemyBulletSpeed		= 270.0f;
+float minFirerate			= 0.7f;
+
+//float powerupSpawnRate		= 10.0f;
 
 int   score					= 0;
+int	  currentScore;
 bool  gameover				= true;
+bool  notFirstTime			= false;
+
+float timerBuff = 10.0f;
+float elapsedTime;
 
 //Text
 sf::Font headingFont;
@@ -65,14 +93,10 @@ sf::Text headingText;
 sf::Font scoreFont;
 sf::Text scoreText;
 
-sf::Text ammoText;
+sf::Text timerText;
 
 sf::Text tutorialText;
-
-sf::Vector2f playerPosition;
-bool playerMoving = false;
-
-sf::Vector2i mousePos;
+sf::Text gameoverText;
 
 void shoot					(sf::Vector2f playerPos	, sf::Vector2i mousePos);
 bool checkCollisionBullet	(sf::Sprite sprite1		, sf::Sprite sprite2);
@@ -84,10 +108,8 @@ void reset();
 void init() {
 
 	//TEXTURE LOAD
-	skyTexture.loadFromFile		("Assets/graphics/sky.png");
-	skySprite.setTexture		(skyTexture);
 	
-	bgTexture.loadFromFile		("Assets/graphics/bg.png");
+	bgTexture.loadFromFile		("Assets/graphics/white.png");
 	bgSprite.setTexture			(bgTexture);
 
 	scoreFont.loadFromFile		("Assets/fonts/Arial.ttf");
@@ -101,35 +123,38 @@ void init() {
 	sf::FloatRect scoreBounds = scoreText.getLocalBounds();
 
 	scoreText.setOrigin			(scoreBounds.width / 2, scoreBounds.height / 2);
-	scoreText.setPosition		(sf::Vector2f(viewSize.x * 0.5f, viewSize.y * 0.20f));
+	scoreText.setPosition		(sf::Vector2f(viewSize.x * 0.5f, viewSize.y * 0.10f));
 
-	//AMMO TEXT LOAD
-	ammoText.setFont			(scoreFont);
-	ammoText.setString			("Puntuación: 0");
-	ammoText.setCharacterSize	(45);
-	ammoText.setFillColor		(sf::Color::White);
-
-	sf::FloatRect ammoBounds =	ammoText.getLocalBounds();
-	ammoText.setOrigin			(ammoBounds.width / 2, ammoBounds.height / 2);
-	ammoText.setPosition		(sf::Vector2f(200.0f, viewSize.y * 0.85f));
 
 	//TUTORIAL TEXT LOAD
 	tutorialText.setFont		(scoreFont);
-	tutorialText.setString		("Pulsa Click Izquierdo para DISPARAR y apunta con el Ratón\n\n Pulsa W A S D para MOVERTE\n\n\n Haz click para empezar");
+	tutorialText.setString		(" Coge botellas de licor café para ser invulnerable a las balas,\n\n correr más y disparar más rápido\n\n APUNTA con el ratón y pulsa click izquierdo para DISPARAR\n\n Pulsa W A S D para MOVERTE\n\n\n\n Haz click para empezar ");
 	tutorialText.setCharacterSize(32);
-	tutorialText.setFillColor	(sf::Color::Magenta);
+	tutorialText.setFillColor	(sf::Color::Black);
 
 	sf::FloatRect tutorialBounds = tutorialText.getLocalBounds();
 	tutorialText.setOrigin		(tutorialBounds.width / 2, tutorialBounds.height / 2);
-	tutorialText.setPosition	(sf::Vector2f(viewSize.x * 0.5f, viewSize.y * 0.45f));
+	tutorialText.setPosition	(sf::Vector2f(viewSize.x * 0.5f, viewSize.y * 0.30f));
+
+	//GAMEOVER TEXT LOAD
+	gameoverText.setFont(scoreFont);
+	gameoverText.setString("Te ha matao un gitano xd\n\n\n\n			Score: 0" + std::to_string(score));
+	gameoverText.setCharacterSize(50);
+	gameoverText.setFillColor(sf::Color::White);
+
+	sf::FloatRect gameoverBounds = gameoverText.getLocalBounds();
+	gameoverText.setOrigin(gameoverBounds.width / 2, gameoverBounds.height / 2);
+	gameoverText.setPosition(sf::Vector2f(viewSize.x * 0.5f, viewSize.y * 0.5f));
 
 	//BACKGROUND MUSIC
-	//bgMusic.openFromFile("Assets/audio/bgMusic.ogg");
-	//bgMusic.play();
+	bgMusic.openFromFile("Assets/audio/bgMusic.ogg");
+	bgMusic.play();
 
 	//HIT SOUND LOAD
 	hitBuffer.loadFromFile("Assets/audio/hit.ogg");
+	hit2Buffer.loadFromFile("Assets/audio/hit2.ogg");
 	fireBuffer.loadFromFile("Assets/audio/fire.ogg");
+	fireBuffer2.loadFromFile("Assets/audio/fire.ogg");
 
 	//HERO LOAD
 	hero.init("Assets/graphics/heroAnim.png", 4, 1.0f, sf::Vector2f(viewSize.x * 0.5f, viewSize.y * 0.5f));
@@ -181,9 +206,9 @@ void spawnEnemy() {
 	enemy->init("Assets/graphics/enemy.png", enemyPos);
 
 		//INCREASE SPEED IN FUTURE ENEMIES PER SCORE
-		if (100 + score * 5.0f < maxSpeed){
+		if (100 + score * 4.0f < maxSpeed){
 			
-			enemy->enemySpeed += score * 5.0f;
+			enemy->enemySpeed += score * 4.0f;
 			std::cout << enemy->enemySpeed << std::endl;
 		
 		}
@@ -194,8 +219,93 @@ void spawnEnemy() {
 		
 		}
 
+		if (1.5f - score / 20.0f > minFirerate) {
+
+			enemy->enemyFireRate -= score / 20.0f;
+			std::cout << enemy->enemyFireRate << std::endl;
+
+		}
+		else {
+
+			enemy->enemyFireRate = minFirerate;
+			std::cout << enemy->enemyFireRate << std::endl;
+
+		}
+
 	enemies.push_back(enemy);
 	
+	}
+
+}
+
+void spawnPowerup() {
+
+	int randLoc = rand() % 4;
+	sf::Vector2f powerupPos;
+
+	//DIFFERENT ENEMY SPAWN POINTS
+	if (powerups.size() < 1) {
+
+		switch (randLoc) {
+
+		case 0: powerupPos = sf::Vector2f(viewSize.x * 0.70f, viewSize.y * 0.70f);
+			break;
+
+		case 1: powerupPos = sf::Vector2f(viewSize.x * 0.70f, viewSize.y * 0.30f);
+			break;
+
+		case 2: powerupPos = sf::Vector2f(viewSize.x * 0.30f, viewSize.y * 0.30f);
+			break;
+
+		case 3: powerupPos = sf::Vector2f(viewSize.x * 0.30f, viewSize.y * 0.70f);
+			break;
+
+		default: printf("Incorrect y Value \n");
+			return;
+
+		}
+
+		Powerup* powerup = new Powerup();
+		powerup->init("Assets/graphics/powerup.png", powerupPos);
+
+		powerups.push_back(powerup);
+
+	}
+
+}
+
+void spawnEnemy2() {
+
+	int randLoc = rand() % 4;
+	sf::Vector2f enemy2Pos;
+
+	//DIFFERENT ENEMY SPAWN POINTS
+	if (enemies2.size() < 1) {
+
+		switch (randLoc) {
+
+		case 0: enemy2Pos = sf::Vector2f(viewSize.x * 0, viewSize.y);
+			break;
+
+		case 1: enemy2Pos = sf::Vector2f(viewSize.x , viewSize.y * 0);
+			break;
+
+		case 2: enemy2Pos = sf::Vector2f(viewSize.x * 0, viewSize.y * 0);
+			break;
+
+		case 3: enemy2Pos = sf::Vector2f(viewSize.x, viewSize.y);
+			break;
+
+		default: printf("Incorrect y Value \n");
+			return;
+
+		}
+
+		Enemy2* enemy2 = new Enemy2();
+		enemy2->init("Assets/graphics/enemy2.png", enemy2Pos);
+
+		enemies2.push_back(enemy2);
+
 	}
 
 }
@@ -204,14 +314,21 @@ void spawnEnemy() {
 void draw() {
 
 	//DRAW 
-	window.draw	(skySprite);
 	window.draw	(bgSprite);
 	window.draw	(hero.getSprite());
+	
+	for (Powerup* powerup : powerups) {
+		window.draw(powerup->getSprite());
+	}
+	
+	for (Enemy2* enemy2 : enemies2) {
+		window.draw(enemy2->getSprite());
+	}
 
 	for (Enemy* enemy : enemies) {
 		window.draw(enemy->getSprite());
 	}
-
+	
 	for (Missile* missile : missiles) {
 		window.draw(missile->getSprite());
 	}
@@ -220,13 +337,26 @@ void draw() {
 		window.draw(missile->getSprite());
 	}
 
-	if (gameover) {
+	if (gameover && !notFirstTime) {
+		
 		window.draw(headingText);
 		window.draw(tutorialText);
+	
+	}
+	else if(gameover && notFirstTime) {
+		
+		window.draw(gameoverText);
+	
 	}
 	else {
+		
 		window.draw(scoreText);
-		window.draw(ammoText);
+		
+		if (heroPowered) {
+
+			window.draw(timerText);
+		
+		}
 	}
 
 }
@@ -280,28 +410,20 @@ void updateInput(float dtb) {
 				if (gameover) {
 
 					gameover = false;
+					notFirstTime = true;
 					reset();
 
 				}
 				else {
 				
 					if (currentTimeBullet >= prevTimeBullet + cadence) {
-						
-						if(ammo > 0){
 								
-							mousePos =	sf::Mouse::getPosition(window);
-							shoot		(hero.getSprite().getPosition(), mousePos);
-							ammo--;
-								
-							std::string finalAmmo =			"Munición: " + std::to_string(ammo);
-							ammoText.setString				(finalAmmo);
-							sf::FloatRect ammoBounds =		ammoText.getLocalBounds();
-							ammoText.setOrigin				(ammoBounds.width / 2	, ammoBounds.height / 2);
-							ammoText.setPosition			(sf::Vector2f(200.0f	, viewSize.y * 0.85f));
-								
-							prevTimeBullet = currentTimeBullet;
+						mousePos =	sf::Mouse::getPosition(window);
+						shoot		(hero.getSprite().getPosition(), mousePos);
+									
+						prevTimeBullet = currentTimeBullet;
 							
-						}
+						
 					}
 				}
 			}
@@ -316,7 +438,7 @@ void updateInput(float dtb) {
 		if (event.key.code == sf::Keyboard::Escape){
 			
 			gameover = true;
-		
+			
 		}
 
 	}
@@ -327,6 +449,8 @@ void update(float dt) {
 	
 	hero.update(dt, viewSize, playerMovingRight, playerMovingLeft);
 	currentTime += dt;
+	//currentTime2 += dt;
+	currentTime3 += dt;
 
 	if (playerMovingDown) {
 		hero.move(0, heroSpeed * dt);
@@ -346,13 +470,69 @@ void update(float dt) {
 		spawnEnemy();
 		
 		prevTime = currentTime;
-		spawnRate = spawnRate - 0.10f;
+		spawnRate = spawnRate - 0.5f;
 		
 		if (spawnRate < minSpawnRate) {
 			spawnRate = minSpawnRate;
 		}
 
 	}
+
+	if (score % 20 == 0 && score != 0) {
+
+		spawnEnemy2();
+
+	}
+	
+	if (score % 15 == 0 && score != 0 && !heroPowered) {
+
+		spawnPowerup();
+		
+
+	}
+
+	if (heroPowered) {
+
+		hero.setSprite("Assets/graphics/heroglow.png");
+		heroSpeed = 900.0f;
+		cadence = 0.10f;
+		bulletSpeed = 4000.0f;
+		
+		timerText.setFont(scoreFont);		
+		std::string timerS = "Kills restantes buff: " + std::to_string(5 - (score - currentScore));
+		timerText.setCharacterSize(32);
+		timerText.setFillColor(sf::Color::White);
+		timerText.setString(timerS);
+
+		sf::FloatRect timerBounds = timerText.getLocalBounds();
+		timerText.setOrigin(timerBounds.width / 2, timerBounds.height / 2);
+		timerText.setPosition(sf::Vector2f(viewSize.x * 0.8, viewSize.y * 0.2f));
+
+
+		if (score - currentScore == 5) {
+			
+			hero.setSprite("Assets/graphics/heroAnim.png");
+			heroSpeed = 600.0f;
+			cadence = 0.20f;
+			bulletSpeed = 2000.0f;
+			heroPowered = false;
+		
+		}
+	
+
+	}
+
+
+
+	/*if (currentTime2 >= prevTime2 + powerupSpawnRate) {
+
+		spawnPowerup();
+
+		prevTime2 = currentTime2;
+
+	}*/
+	
+
 	
 	for (int i = 0; i < enemies.size(); i++) {
 		
@@ -376,6 +556,16 @@ void update(float dt) {
 			enemy->enemyShootAllowed = false;
 			
 		}				
+	}
+
+	for (int i = 0; i < enemies2.size(); i++) {
+
+		Enemy2* enemy2 = enemies2[i];
+
+		sf::Vector2f heroPos = sf::Vector2f(hero.getSprite().getPosition().x, hero.getSprite().getPosition().y);
+		sf::Vector2f enemy2Pos = sf::Vector2f(enemy2->getSprite().getPosition().x, enemy2->getSprite().getPosition().y);
+		enemy2->update(hero.getSprite().getPosition().x, hero.getSprite().getPosition().y, enemy2->enemy2Speed, dt);
+
 	}
 
 	for (int i = 0; i < enemyMissiles.size(); i++) {
@@ -411,7 +601,54 @@ void update(float dt) {
 
 		if (checkCollisionHero(hero.getSprite(), enemy->getSprite())) {
 
+			hero.setSprite("Assets/graphics/heroAnim.png");
+			bgTexture.loadFromFile("Assets/graphics/gameover.png");
+			bgSprite.setTexture(bgTexture);
+			gameoverText.setString("Te ha matao un gitano xd\n\n\n\n			Score: " + std::to_string(score));
+			window.draw(gameoverText);
+			heroSpeed = 600.0f;
+			cadence = 0.20f;
+			bulletSpeed = 2000.0f;
+			heroPowered = false;
 			gameover = true;
+		}
+
+	}
+
+	for (int i = 0; i < enemies2.size(); i++) {
+
+		Enemy2* enemy2 = enemies2[i];
+
+		if (checkCollisionHero(hero.getSprite(), enemy2->getSprite())) {
+
+			hero.setSprite("Assets/graphics/heroAnim.png");
+			bgTexture.loadFromFile("Assets/graphics/gameover.png");
+			bgSprite.setTexture(bgTexture);
+			gameoverText.setString("Te ha matao un gitano xd\n\n		Aun encima enano\n\n			Score: " + std::to_string(score));
+			window.draw(gameoverText);
+			heroSpeed = 600.0f;
+			cadence = 0.20f;
+			bulletSpeed = 2000.0f;
+			heroPowered = false;
+			gameover = true;
+		}
+
+	}
+
+	for (int i = 0; i < powerups.size(); i++) {
+
+		Powerup* powerup = powerups[i];
+
+		if (checkCollisionHero(hero.getSprite(), powerup->getSprite())) {
+
+			currentScore = score;
+			heroPowered = true;
+		
+			powerups.erase(powerups.begin() + i);
+			delete(powerup);
+			powerups.clear();
+			prevTime3 = 0.0f;
+			currentTime3 = 0.0f;
 
 		}
 
@@ -421,10 +658,14 @@ void update(float dt) {
 
 		EnemyMissile* missile = enemyMissiles[i];
 		
-		if (checkCollisionHero(hero.getSprite(), missile->getSprite())) {
+		if (checkCollisionHero(hero.getSprite(), missile->getSprite()) && !heroPowered) {
 
+			
+			bgTexture.loadFromFile("Assets/graphics/gameover.png");
+			bgSprite.setTexture(bgTexture);
+			gameoverText.setString("Te ha matao un gitano xd\n\n\n\n			Score: " + std::to_string(score));
+			window.draw(gameoverText);
 			gameover = true;
-
 		}
 	}
 
@@ -439,19 +680,12 @@ void update(float dt) {
 
 				hitSound.play();
 				score++;
-				ammo++;
 
 				std::string finalScore				= "Puntuación: " + std::to_string(score);
 				scoreText.setString(finalScore);
 				sf::FloatRect scoreBounds			= scoreText.getLocalBounds();
 				scoreText.setOrigin					(scoreBounds.width / 2	, scoreBounds.height / 2);
 				scoreText.setPosition(sf::Vector2f	(viewSize.x * 0.5f		, viewSize.y * 0.10f));
-
-				std::string finalAmmo				= "Munición: "	 + std::to_string(ammo);
-				ammoText.setString(finalAmmo);
-				sf::FloatRect ammoBounds			= ammoText.getLocalBounds();
-				ammoText.setOrigin					(ammoBounds.width / 2	, ammoBounds.height / 2);
-				ammoText.setPosition(sf::Vector2f	(200.0f					, viewSize.y * 0.85f));
 
 				missiles.erase	(missiles.begin() + i);
 				enemies.erase	(enemies.begin()  + j);
@@ -462,6 +696,34 @@ void update(float dt) {
 			}
 		}
 	}
+
+	 for (int j = 0; j < enemies2.size(); j++) {
+
+		 for (int i = 0; i < missiles.size(); i++) {
+
+			 Missile* missile = missiles[i];
+			 Enemy2* enemy2 = enemies2[j];
+
+			 if (checkCollisionBullet(missile->getSprite(), enemy2->getSprite())) {
+
+				 hit2Sound.play();
+				 score++;
+
+				 std::string finalScore = "Puntuación: " + std::to_string(score);
+				 scoreText.setString(finalScore);
+				 sf::FloatRect scoreBounds = scoreText.getLocalBounds();
+				 scoreText.setOrigin(scoreBounds.width / 2, scoreBounds.height / 2);
+				 scoreText.setPosition(sf::Vector2f(viewSize.x * 0.5f, viewSize.y * 0.10f));
+
+				 missiles.erase(missiles.begin() + i);
+				 enemies2.erase(enemies2.begin() + j);
+
+				 delete(missile);
+				 delete(enemy2);
+
+			 }
+		 }
+	 }
 }
 
 void shoot(sf::Vector2f playerPos, sf::Vector2i mousePos) {
@@ -476,7 +738,7 @@ void shoot(sf::Vector2f playerPos, sf::Vector2i mousePos) {
 	
 	Missile* missile = new Missile();
 
-	missile->init("Assets/graphics/rocket.png", sf::Vector2f(hero.getSprite().getPosition().x, hero.getSprite().getPosition().y), missileSpeedx, missileSpeedy);
+	missile->init("Assets/graphics/missile.png", sf::Vector2f(hero.getSprite().getPosition().x, hero.getSprite().getPosition().y), missileSpeedx, missileSpeedy);
 	
 	missiles.push_back(missile);
 
@@ -496,11 +758,11 @@ void enemyShoot(sf::Vector2f playerPos, sf::Vector2f enemyPos) {
 
 	EnemyMissile* missile = new EnemyMissile();
 
-	missile->init("Assets/graphics/rocket.png", sf::Vector2f(enemyPos.x, enemyPos.y), missileSpeedx, missileSpeedy);
+	missile->init("Assets/graphics/enemymissile.png", sf::Vector2f(enemyPos.x, enemyPos.y), missileSpeedx, missileSpeedy);
 
 	enemyMissiles.push_back(missile);
 
-	fireSound.play();
+	fireSound2.play();
 
 }
 
@@ -549,6 +811,51 @@ bool checkCollisionBullet(sf::Sprite sprite1, sf::Sprite sprite2) {
 
 }
 
+void reset() {
+
+		bgTexture.loadFromFile("Assets/graphics/bg.png");
+		bgSprite.setTexture(bgTexture);
+
+		score = 0;
+		currentTime = 0.0f;
+		prevTime = 0.0f;
+		currentTimeBullet = 0.0f;
+		prevTimeBullet = 0.0f;
+		scoreText.setString("Puntuación: 0");
+		spawnRate = 1.50f;
+		enemyBulletSpeed = 500.0f;
+
+		hero.~Hero();
+		hero.init("Assets/graphics/heroAnim.png", 4, 1.0f, sf::Vector2f(viewSize.x * 0.5f, viewSize.y * 0.5f));
+
+		for (Enemy* enemy : enemies) {
+			delete (enemy);
+		}
+
+		for (Enemy2* enemy2 : enemies2) {
+			delete (enemy2);
+		}
+
+		for (Missile* missile : missiles) {
+			delete (missile);
+		}
+
+		for (EnemyMissile* missile : enemyMissiles) {
+			delete (missile);
+		}
+
+		for (Powerup* powerup : powerups) {
+			delete (powerup);
+		}
+
+		enemies.clear();
+		enemies2.clear();
+		missiles.clear();
+		enemyMissiles.clear();
+		powerups.clear();
+	
+}
+
 int main() {
 
 	sf::Clock clock;
@@ -556,6 +863,10 @@ int main() {
 	
 	//INITIALIZE OBJECTS
 	init();
+
+	//HIDE CONSOLE
+	HWND hWnd = GetConsoleWindow();
+	ShowWindow(hWnd, SW_HIDE);
 
 	//OPEN WINDOW
 	while (window.isOpen()) {
@@ -584,35 +895,3 @@ int main() {
 }
 
 
-void reset() {
-
-	score				= 0;
-	currentTime			= 0.0f;
-	prevTime			= 0.0f;
-	currentTimeBullet	= 0.0f;
-	prevTimeBullet		= 0.0f;
-	ammo				= 10;
-	scoreText.setString ("Puntuación: 0");
-	ammoText.setString	("Munición: 10");
-	spawnRate			= 1.50f;
-	enemyBulletSpeed	= 500.0f;
-
-	hero.~Hero();
-	hero.init("Assets/graphics/heroAnim.png", 4, 1.0f, sf::Vector2f(viewSize.x * 0.5f, viewSize.y * 0.5f));
-
-	for (Enemy* enemy : enemies) {
-		delete (enemy);
-	}
-
-	for (Missile* missile : missiles) {
-		delete (missile);
-	}
-
-	for (EnemyMissile* missile : enemyMissiles) {
-		delete (missile);
-	}
-
-	enemies.clear();
-	missiles.clear();
-	enemyMissiles.clear();
-}

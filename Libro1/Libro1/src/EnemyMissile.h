@@ -2,7 +2,6 @@
 
 #include "SFML-2.6.0\include\SFML\Graphics.hpp"
 
-
 class EnemyMissile {
 
 public:

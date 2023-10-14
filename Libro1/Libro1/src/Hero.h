@@ -12,6 +12,7 @@ public:
 	void update	(float dt, sf::Vector2f viewSize, bool right, bool left);
 	void move	(float velocityx, float velocityy);
 	sf::Sprite getSprite();
+	void setSprite(std::string sprite);
 
 private:
 

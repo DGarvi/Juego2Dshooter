@@ -19,6 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Enemy2.cpp" />
+    <ClCompile Include="src\Powerup.cpp" />
     <ClCompile Include="src\EnemyMissile.cpp" />
     <ClCompile Include="src\Missile.cpp" />
     <ClCompile Include="src\Enemy.cpp" />
@@ -26,6 +28,8 @@
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Enemy2.h" />
+    <ClInclude Include="src\Powerup.h" />
     <ClInclude Include="src\EnemyMissile.h" />
     <ClInclude Include="src\Missile.h" />
     <ClInclude Include="src\Enemy.h" />

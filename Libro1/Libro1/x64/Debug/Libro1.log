@@ -9,4 +9,32 @@ D:\Git\Libro1\Libro1\Libro1\src\Enemy.cpp(19,45): warning C4244: 'argument': con
           [
               T=unsigned int
           ]
+  EnemyMissile.cpp
+D:\Git\Libro1\Libro1\Libro1\src\EnemyMissile.cpp(14,73): warning C4244: 'argument': conversion from 'T' to 'float', possible loss of data
+          with
+          [
+              T=unsigned int
+          ]
+D:\Git\Libro1\Libro1\Libro1\src\EnemyMissile.cpp(14,46): warning C4244: 'argument': conversion from 'T' to 'float', possible loss of data
+          with
+          [
+              T=unsigned int
+          ]
+  main.cpp
+D:\Git\Libro1\Libro1\Libro1\src\main.cpp(31,44): warning C4244: 'argument': conversion from 'T' to 'unsigned int', possible loss of data
+          with
+          [
+              T=float
+          ]
+D:\Git\Libro1\Libro1\Libro1\src\main.cpp(31,32): warning C4244: 'argument': conversion from 'T' to 'unsigned int', possible loss of data
+          with
+          [
+              T=float
+          ]
+D:\Git\Libro1\Libro1\Libro1\src\main.cpp(509,49): warning C4244: 'argument': conversion from 'double' to 'T', possible loss of data
+          with
+          [
+              T=float
+          ]
+  Generating Code...
   Libro1.vcxproj -> D:\Git\Libro1\Libro1\x64\Debug\Libro1.exe
